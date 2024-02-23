@@ -7,8 +7,8 @@ let net = require("net")
 let setServer = "irc.prison.net"
 let setPort = 6667
 let setNick = "LE-61"
-let channels = ["#test"]
-let admins = ["host.com"]
+let channels = ["#lobo"]
+let admins = ["178.232.172.134"]
 
 const client = net.createConnection({
 	port: setPort,
@@ -20,7 +20,7 @@ client.on("connect",() =>
 	console.log(`Connecting to ${setServer}:${setPort}`)
 
 	client.write(`NICK ${setNick}\r\n`)
-	client.write(`USER ${setNick} * * :H4X0R mIRC v1.3\r\n`)
+	client.write(`USER ${setNick} * * :mIRC v5.2\r\n`)
 })
 
 client.on("data",async (data) =>
@@ -60,11 +60,7 @@ function receiveInfo(data)
 {
 	if(data[1] == "NOTICE")
 	{
-		notice(data[0].split("@")[1],data[3].split(":")[1],data[4])
-	}
-	else if(data[1] == "JOIN")
-	{
-		onJoin(data[0].split("!")[0].split(":")[1],data[0].split("@")[1],data[2].split(":")[1])
+		notice(data[0].split("!")[0].split(":")[1],data[0].split("@")[1],data[3].split(":")[1],data[4])
 	}
 	else if(data[1] == "001")
 	{
@@ -79,7 +75,7 @@ function receiveInfo(data)
 	}
 }
 
-function notice(host,cmd,e)
+function notice(nick,host,cmd,e)
 {
 	if(cmd == "!join")
 	{
@@ -111,20 +107,19 @@ function notice(host,cmd,e)
 			}
 		}
 	}
+	else if(cmd == "!op")
+	{
+		for(let i = 0;i < admins.length;i++)
+		{
+			if(admins[i] == host)
+			{
+				client.write(`MODE ${e} +o-b ${nick} ${generateRandomString(6)}!*@*${generateRandomString(12)}==\r\n`)
+			}
+		}
+	}
 	else
 	{
 		return null
-	}
-}
-
-function onJoin(nick,host,channel)
-{
-	for(let i = 0;i < admins.length;i++)
-	{
-		if(admins[i] == host && nick != setNick)
-		{
-			client.write(`MODE ${channel} +o-b ${nick} ${generateRandomString(6)}!*@*${generateRandomString(12)}==\r\n`)
-		}
 	}
 }
 
@@ -137,10 +132,13 @@ function generateRandomString(length)
 {
 	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     	let randomString = ''
+
     	for(let i = 0; i < length; i++)
 	{
         	const randomIndex = Math.floor(Math.random() * characters.length)
+
         	randomString += characters[randomIndex]
     	}
+
     	return randomString
 }
